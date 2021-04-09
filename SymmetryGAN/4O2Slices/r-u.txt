@@ -1,0 +1,69 @@
+2021-04-07 04:26:43.650582: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2021-04-07 04:26:43.710312: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1561] Found device 0 with properties: 
+pciBusID: 0000:1a:00.0 name: Tesla V100-SXM2-16GB computeCapability: 7.0
+coreClock: 1.53GHz coreCount: 80 deviceMemorySize: 15.78GiB deviceMemoryBandwidth: 836.37GiB/s
+2021-04-07 04:26:43.710926: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2021-04-07 04:26:43.713504: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2021-04-07 04:26:43.716246: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2021-04-07 04:26:43.717356: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2021-04-07 04:26:43.720909: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2021-04-07 04:26:43.722175: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2021-04-07 04:26:43.727613: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2021-04-07 04:26:43.729941: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1703] Adding visible gpu devices: 0
+2021-04-07 04:26:43.730274: I tensorflow/core/platform/cpu_feature_guard.cc:143] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
+2021-04-07 04:26:43.736183: I tensorflow/core/platform/profile_utils/cpu_utils.cc:102] CPU Frequency: 2400000000 Hz
+2021-04-07 04:26:43.736464: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x2aab88000b10 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2021-04-07 04:26:43.736475: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2021-04-07 04:26:43.882198: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55555915a4a0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2021-04-07 04:26:43.882217: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Tesla V100-SXM2-16GB, Compute Capability 7.0
+2021-04-07 04:26:43.883553: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1561] Found device 0 with properties: 
+pciBusID: 0000:1a:00.0 name: Tesla V100-SXM2-16GB computeCapability: 7.0
+coreClock: 1.53GHz coreCount: 80 deviceMemorySize: 15.78GiB deviceMemoryBandwidth: 836.37GiB/s
+2021-04-07 04:26:43.883632: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2021-04-07 04:26:43.883655: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2021-04-07 04:26:43.883663: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2021-04-07 04:26:43.883670: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2021-04-07 04:26:43.883676: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2021-04-07 04:26:43.883683: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2021-04-07 04:26:43.883690: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2021-04-07 04:26:43.885996: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1703] Adding visible gpu devices: 0
+2021-04-07 04:26:43.886038: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2021-04-07 04:26:43.887796: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1102] Device interconnect StreamExecutor with strength 1 edge matrix:
+2021-04-07 04:26:43.887804: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1108]      0 
+2021-04-07 04:26:43.887809: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1121] 0:   N 
+2021-04-07 04:26:43.890147: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1247] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 14900 MB memory) -> physical GPU (device: 0, name: Tesla V100-SXM2-16GB, pci bus id: 0000:1a:00.0, compute capability: 7.0)
+j =  0
+Traceback (most recent call last):
+  File "/global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/4O2Slices/r-u.py", line 171, in <module>
+    generator = define_generator()
+  File "/global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/4O2Slices/r-u.py", line 91, in define_generator
+    mymodel_test = MyLayer()(mymodel_inputtest)
+  File "/usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/keras/engine/base_layer.py", line 922, in __call__
+    outputs = call_fn(cast_inputs, *args, **kwargs)
+  File "/usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/autograph/impl/api.py", line 265, in wrapper
+    raise e.ag_error_metadata.to_exception(e)
+TypeError: in user code:
+
+    /global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/4O2Slices/r-u.py:66 call  *
+        M = tf.convert_to_tensor(npc)
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/ops.py:1283 convert_to_tensor_v2  **
+        as_ref=False)
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/ops.py:1341 convert_to_tensor
+        ret = conversion_func(value, dtype=dtype, name=name, as_ref=as_ref)
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/tensor_conversion_registry.py:52 _default_conversion_function
+        return constant_op.constant(value, dtype, name=name)
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/constant_op.py:262 constant
+        allow_broadcast=True)
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/constant_op.py:300 _constant_impl
+        allow_broadcast=allow_broadcast))
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/framework/tensor_util.py:558 make_tensor_proto
+        append_fn(tensor_proto, proto_values)
+    tensorflow/python/framework/fast_tensor_util.pyx:127 tensorflow.python.framework.fast_tensor_util.AppendObjectArrayToTensorProto
+        
+    /usr/common/software/tensorflow/gpu-tensorflow/2.2.0-py37/lib/python3.7/site-packages/tensorflow/python/util/compat.py:87 as_bytes
+        (bytes_or_text,))
+
+    TypeError: Expected binary or unicode string, got <tf.Tensor 'my_layer/mul_12:0' shape=(1,) dtype=float32>
+
+srun: error: cgpu16: task 0: Exited with exit code 1
+srun: Terminating job step 1771280.0
