@@ -38,36 +38,30 @@ from tensorflow.keras.layers import Layer
 
 class MyLayer(Layer):
 
-    def __init__(self, kernel_initilizer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), **kwargs):
+    def __init__(self, **kwargs):
         super(MyLayer, self).__init__(**kwargs)
-        self.kernel_initializer = tf.keras.initializers.get(kernel_initilizer)
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
         self._r = self.add_weight(name='x', 
                                     shape=(1,),
-                                    initializer=self.kernel_initializer, #'uniform',
+                                    initializer=tf.keras.initializers.RandomUniform(minval= 0.1, maxval=5.), #'uniform',
                                     trainable=True)
         self._u = self.add_weight(name='x', 
                                     shape=(1,),
-                                    initializer=self.kernel_initializer, #'uniform',
+                                    initializer=tf.keras.initializers.RandomUniform(minval=-5, maxval=5.), #'uniform',
                                     trainable=True)
         super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
 
     def call(self, X):
         t = np.pi
-        d = -1
-        if d >= 0:
-            P = np.array([[1, 0], [0, 1]])
-        else:
-            P = np.array([[1, 0], [0, -1]])
-        S = np.array([[self._r*np.cos(t) + self._u*np.sin(t)/self._r, self._u*np.cos(t)/self._r - self._r*np.sin(t)],[np.sin(t)/self._r, np.cos(t)/self._r]])
-        npc = np.matmul(P, S)*np.sqrt(np.absolute(d))
+        npc = [[self._r*np.cos(t) + self._u*np.sin(t)/self._r, self._u*np.cos(t)/self._r - self._r*np.sin(t)],[np.sin(t)/self._r, np.cos(t)/self._r]]
         M = tf.convert_to_tensor(npc)
         M = tf.reshape(M, [2, 2])
         #print("SHAPE OF THINGS:", tf.shape(self._c), "*****", tf.shape(self._s), "*****", tf.shape(M), "****", tf.shape(X) )
         #print("M:", M)
         return tf.linalg.matmul(X, M)
+    
 #Quick vanilla GAN from https://machinelearningmastery.com/how-to-develop-a-generative-adversarial-network-for-a-1-dimensional-function-from-scratch-in-keras/
  
 # define the standalone discriminator model
@@ -158,6 +152,7 @@ def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000)
 		gan_model.train_on_batch(x_gan, y_gan)
 #		if (i+1) % n_eval == 0:
 #			print("epoch = ", i)
+
 N = 20
 r_i = []
 u_i = []
