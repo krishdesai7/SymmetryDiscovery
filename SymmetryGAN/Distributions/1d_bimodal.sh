@@ -6,7 +6,7 @@
 #SBATCH --dependency=singleton
 #SBATCH --mail-user=mail-user=krish.desai@berkeley.edu
 #SBATCH --mail-type=ALL
-#SBATCH --output 1d_bimodalt
+#SBATCH --output 1d_bimodal.txt
 
 module load cgpu
 module load tensorflow/gpu-2.2.0-py37
