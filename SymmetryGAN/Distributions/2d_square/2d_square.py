@@ -16,32 +16,35 @@ from sklearn.model_selection import train_test_split
 import scipy
 from matplotlib import gridspec
 from tensorflow.keras.layers import Layer
-
+import sys
 class MyLayer(Layer):
 
-    def __init__(self, kernel_initilizer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), **kwargs):
+    def __init__(self, **kwargs):
         super(MyLayer, self).__init__(**kwargs)
-        self.kernel_initializer = tf.keras.initializers.get(kernel_initilizer)
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
-        self._b = self.add_weight(name='x', 
-                                    shape=(1,),
-                                    initializer=self.kernel_initializer, #'uniform',
-                                    trainable=True)
         self._c = self.add_weight(name='x', 
                                     shape=(1,),
-                                    initializer=self.kernel_initializer, #'uniform',
+                                    initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), #'uniform',
+                                    trainable=True)
+        self._s = self.add_weight(name='x', 
+                                    shape=(1,),
+                                    initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), #'uniform',
                                     trainable=True)
         super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
 
-    def call(self, x):
-        return self._b + self._c*x
-    
+    def call(self, X):
+        npc = [[self._c,-1.0*self._s],[self._s,self._c]]
+        M = tf.convert_to_tensor(npc)
+        M = tf.reshape(M, [2, 2])
+        #print("SHAPE OF THINGS:", tf.shape(self._c), "*****", tf.shape(self._s), "*****", tf.shape(M), "****", tf.shape(X) )
+        #print("M:", M)
+        return tf.linalg.matmul(X, M)
 #Quick vanilla GAN from https://machinelearningmastery.com/how-to-develop-a-generative-adversarial-network-for-a-1-dimensional-function-from-scratch-in-keras/
  
 # define the standalone discriminator model
-def define_discriminator(n_inputs=1):
+def define_discriminator(n_inputs=2):
 	model = Sequential()
 	model.add(Dense(25, activation='relu', input_dim=n_inputs))
 	model.add(Dense(25, activation='relu', input_dim=n_inputs))    
@@ -57,7 +60,7 @@ def define_generator(n_outputs=1):
 	#model.add(Dense(15, activation='relu', input_dim=n_outputs))    
 	#model.add(Dense(n_outputs, activation='linear'))
 
-	mymodel_inputtest = Input(shape=(1,))
+	mymodel_inputtest = Input(shape=(2,))
 	mymodel_test = MyLayer()(mymodel_inputtest)
 	model = Model(mymodel_inputtest, mymodel_test)
 	return model
@@ -78,13 +81,23 @@ def define_gan(generator, discriminator):
  
 # generate n real samples with class labels
 def generate_real_samples(n):
-	mu, sigma = -1, 0.4
-	mu2, sigma2 = 1, 0.4
-	X1 = np.random.normal(mu, sigma, n//2)
-	X2 = np.random.normal(mu2, sigma2, n//2)
-	X = np.concatenate([X1, X2])
-	#X = np.random.normal(0, 1, n)
-	plt.hist(X, bins=50)
+	amounts = np.random.multinomial(n,np.ones(25)/25.) 
+	X1 = []
+	X2 = []
+	mycounter = 0
+	for i in range(5):
+		for j in range(5):
+			X1 = np.concatenate([X1,np.random.normal(i+0.1,0.1,amounts[mycounter])])
+			X2 = np.concatenate([X2,np.random.normal(j+0.1,0.1,amounts[mycounter])])
+			mycounter+=1
+			pass
+		pass    
+    
+	X1 = X1.reshape(len(X1), 1)
+	X2 = X2.reshape(len(X2), 1)    
+	X = hstack((X1, X2))
+	np.random.shuffle(X)
+	# generate class labels
 	y = ones((n, 1))
 	return X, y
  
@@ -132,30 +145,29 @@ def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000)
 		y_gan = ones((n_batch, 1))
 		# update the generator via the discriminator's error
 		gan_model.train_on_batch(x_gan, y_gan)
-		if (i+1) % n_eval == 0:
-			print("epoch = ", i)
-          
-        
+#		if (i+1) % n_eval == 0:
+#			print("epoch = ", i)
 N = 10
-b_i = []
 c_i = []
-b_f = []
+s_i = []
 c_f = []
+s_f = []
 for j in range(N):
-    print("j = ", j)
+    print("j = ", j+1)
     # create the discriminator
     discriminator = define_discriminator()
     # create the generator
     generator = define_generator()
     # create the gan
     gan_model = define_gan(generator, discriminator)
-    b_i.append(generator.layers[-1].get_weights()[0][0])
-    c_i.append(generator.layers[-1].get_weights()[1][0])
+    c_i.append(generator.layers[-1].get_weights()[0][0])
+    s_i.append(generator.layers[-1].get_weights()[1][0])
     # train model
     train(generator, discriminator, gan_model)
-    b_f.append(generator.layers[-1].get_weights()[0][0])
-    c_f.append(generator.layers[-1].get_weights()[1][0])
-    print("b_i = ", b_i)
-    print("c_i = ", c_i)
-    print("b_f = ", b_f)
-    print("c_f = ", c_f)
+    c_f.append(generator.layers[-1].get_weights()[0][0])
+    s_f.append(generator.layers[-1].get_weights()[1][0])
+print("c_i = ", c_i)
+print("s_i = ", s_i)
+print("c_f = ", c_f)
+print("s_f = ", s_f)
+
