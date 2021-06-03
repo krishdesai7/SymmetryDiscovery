@@ -81,25 +81,24 @@ def define_gan(generator, discriminator):
  
 # generate n real samples with class labels
 def generate_real_samples(n):
-	amounts = np.random.multinomial(n,np.ones(25)/25.) 
+	amounts = np.random.multinomial(n,np.ones(8)/8.)
 	X1 = []
 	X2 = []
 	mycounter = 0
-	for i in range(5):
-		for j in range(5):
-			X1 = np.concatenate([X1,np.random.normal(i-2,0.1,amounts[mycounter])])
-			X2 = np.concatenate([X2,np.random.normal(j-2,0.1,amounts[mycounter])])
-			mycounter+=1
-			pass
-		pass    
-    
-	X1 = X1.reshape(len(X1), 1)
-	X2 = X2.reshape(len(X2), 1)    
+	for i in range(8):
+		X1 = np.concatenate([X1,np.random.normal(np.cos(2*i*np.pi/8),0.1,amounts[mycounter])])
+		X2 = np.concatenate([X2,np.random.normal(np.sin(2*i*np.pi/8),0.1,amounts[mycounter])])
+		mycounter+=1
+		pass
+
+	X1 = X1.reshape(n, 1)
+	X2 = X2.reshape(n, 1)    
 	X = hstack((X1, X2))
 	np.random.shuffle(X)
 	# generate class labels
 	y = ones((n, 1))
 	return X, y
+
  
 # generate points in latent space as input for the generator
 def generate_latent_points(n):
@@ -170,4 +169,5 @@ print("c_i = ", c_i)
 print("s_i = ", s_i)
 print("c_f = ", c_f)
 print("s_f = ", s_f)
+
 
