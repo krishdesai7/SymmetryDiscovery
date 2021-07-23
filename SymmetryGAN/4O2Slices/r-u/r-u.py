@@ -47,19 +47,22 @@ class MyLayer(Layer):
                                     shape=(1,),
                                     initializer=tf.keras.initializers.RandomUniform(minval= 0.1, maxval=5.), #'uniform',
                                     trainable=True)
-        self._u = self.add_weight(name='x', 
+        self._t = self.add_weight(name='x', 
                                     shape=(1,),
-                                    initializer=tf.keras.initializers.RandomUniform(minval=-5, maxval=5.), #'uniform',
+                                    initializer=tf.keras.initializers.RandomUniform(minval=0, maxval=2*np.pi), #'uniform',
+                                    trainable=True)
+        self._d = self.add_weight(name='x', 
+                                    shape=(1,),
+                                    initializer=tf.keras.initializers.RandomUniform(minval=-3, maxval=3), #'uniform',
                                     trainable=True)
         super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
 
     def call(self, X):
-        t = np.pi
-        npc = [[self._r*np.cos(t) + self._u*np.sin(t)/self._r, self._u*np.cos(t)/self._r - self._r*np.sin(t)],[np.sin(t)/self._r, np.cos(t)/self._r]]
+        u = 0.0
+        p = -1.0 if self._d < 0 else 1.0
+        npc = [[tf.math.sqrt(tf.math.abs(self._d))*self._r*tf.math.cos(self._t) + tf.math.sqrt(tf.math.abs(self._d))*u*tf.math.sin(self._t)/self._r, u*tf.math.cos(self._t)/self._r - self._r*tf.math.sin(self._t)],[tf.math.sqrt(tf.math.abs(self._d))*p*tf.math.sin(self._t)/self._r, tf.math.sqrt(tf.math.abs(self._d))*p*tf.math.cos(self._t)/self._r]]
         M = tf.convert_to_tensor(npc)
         M = tf.reshape(M, [2, 2])
-        #print("SHAPE OF THINGS:", tf.shape(self._c), "*****", tf.shape(self._s), "*****", tf.shape(M), "****", tf.shape(X) )
-        #print("M:", M)
         return tf.linalg.matmul(X, M)
     
 #Quick vanilla GAN from https://machinelearningmastery.com/how-to-develop-a-generative-adversarial-network-for-a-1-dimensional-function-from-scratch-in-keras/
@@ -102,7 +105,7 @@ def define_gan(generator, discriminator):
  
 # generate n real samples with class labels
 def generate_real_samples(n):
-	X = np.random.multivariate_normal([0, 0], [[1, 0],[0, 1]],n)
+	X = np.random.multivariate_normal([0, 0], [[1, 0],[0, 2]],n)
 	y = ones((n, 1))
 	return X, y
  
@@ -153,11 +156,13 @@ def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000)
 #		if (i+1) % n_eval == 0:
 #			print("epoch = ", i)
 
-N = 20
+N = 50
 r_i = []
-u_i = []
+t_i = []
+d_i = []
 r_f = []
-u_f = []
+t_f = []
+d_f = []
 for j in range(N):
     print("j = ", j)
     # create the discriminator
@@ -167,12 +172,17 @@ for j in range(N):
     # create the gan
     gan_model = define_gan(generator, discriminator)
     r_i.append(generator.layers[-1].get_weights()[0][0])
-    u_i.append(generator.layers[-1].get_weights()[1][0])
+    t_i.append(generator.layers[-1].get_weights()[1][0])
+    d_i.append(generator.layers[-1].get_weights()[2][0])
     # train model
     train(generator, discriminator, gan_model)
     r_f.append(generator.layers[-1].get_weights()[0][0])
-    u_f.append(generator.layers[-1].get_weights()[1][0])
+    t_f.append(generator.layers[-1].get_weights()[1][0])
+    d_f.append(generator.layers[-1].get_weights()[2][0])
+print("Asymm Gaussian")
 print("r_i = ", r_i)
-print("u_i = ", u_i)
+print("t_i = ", t_i)
+print("d_i = ", d_i)
 print("r_f = ", r_f)
-print("u_f = ", u_f)
+print("t_f = ", t_f)
+print("d_f = ", d_f)

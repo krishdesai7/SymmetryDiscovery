@@ -12,4 +12,4 @@ module load cgpu
 module load tensorflow/gpu-2.2.0-py37
 conda activate tf-gpu
 
-srun -n 1 -c 1 python3 /global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/4O2Slices/r-u.py
+srun -n 1 -c 1 python3 /global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/4O2Slices/r-u/r-u.py
