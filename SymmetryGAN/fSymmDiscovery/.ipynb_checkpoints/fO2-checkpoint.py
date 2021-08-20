@@ -17,6 +17,7 @@ import scipy
 from matplotlib import gridspec
 from tensorflow.keras.layers import Layer
 import sys
+
 class MyLayer(Layer):
 
     def __init__(self, **kwargs):
@@ -131,7 +132,7 @@ def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000)
 		gan_model.train_on_batch(x_gan, y_gan)
 #		if (i+1) % n_eval == 0:
 #			print("epoch = ", i)
-N = 50
+N = 1
 c_i = []
 s_i = []
 c_f = []

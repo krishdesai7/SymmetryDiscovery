@@ -6,10 +6,10 @@
 #SBATCH --dependency=singleton
 #SBATCH --mail-user=mail-user=krish.desai@berkeley.edu
 #SBATCH --mail-type=ALL
-#SBATCH --output fO2data.txt
+#SBATCH --output LHCO.txt
 
 module load cgpu
 module load tensorflow/gpu-2.2.0-py37
 conda activate tf-gpu
 
-srun -n 1 -c 1 python3 /global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/fSymmDiscovery/fO2.py
+srun -n 1 -c 1 python3 /global/u1/k/kdesai/SymmetryDiscovery/SymmetryGAN/LHCO/LHCO.py

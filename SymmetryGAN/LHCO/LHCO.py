@@ -1,22 +1,27 @@
-import tensorflow as tf
 import numpy as np
+from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
-from numpy import hstack
-from numpy import zeros
-from numpy import ones
-from numpy.random import rand
-from numpy.random import randn
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Lambda, Dense, Input, Layer, Dropout
-from tensorflow.keras.callbacks import EarlyStopping, LambdaCallback
-from tensorflow.keras.utils import to_categorical
+from mpl_toolkits import mplot3d
+
+import tensorflow as tf
+import tensorflow.keras
+import tensorflow.keras.backend as K
+from tensorflow.keras.layers import Dense, Input, Dropout, Concatenate
 from tensorflow.keras.models import Model
-from matplotlib import pyplot
-from sklearn.model_selection import train_test_split
-import scipy
-from matplotlib import gridspec
-from tensorflow.keras.layers import Layer
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Lambda, Layer
+from tensorflow.keras.models import Sequential
+import pandas as pd
 import sys
+
+f = pd.read_hdf("events_anomalydetection_DelphesPythia8_v2_qcd_features.h5")
+
+G = (f[['pxj1','pxj2', 'pyj1', 'pyj2']]).to_numpy()
+px1 = G[:, 0]
+py1 = G[:, 2]
+px2 = G[:, 1]
+py2 = G[:, 3]
 
 class MyLayer(Layer):
 
@@ -25,27 +30,27 @@ class MyLayer(Layer):
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
-        self._c = self.add_weight(name='x', 
-                                    shape=(1,),
-                                    initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), #'uniform',
+        self._t1 = self.add_weight(name='x', 
+                                    #shape=(1,),
+                                    initializer=tf.keras.initializers.RandomUniform(minval= 0, maxval=2*np.pi), #'uniform',
                                     trainable=True)
-        self._s = self.add_weight(name='x', 
-                                    shape=(1,),
-                                    initializer=tf.keras.initializers.RandomUniform(minval=-1., maxval=1.), #'uniform',
+        self._t2 = self.add_weight(name='x', 
+                                    #shape=(1,),
+                                    initializer=tf.keras.initializers.RandomUniform(minval=0, maxval=2*np.pi), #'uniform',
                                     trainable=True)
         super(MyLayer, self).build(input_shape)  # Be sure to call this at the end
 
     def call(self, X):
-        npc = [[self._c,-1.0*self._s],[self._s,self._c]]
+        s1 = tf.math.sin(self._t1)
+        c1 = tf.math.cos(self._t1)
+        s2 = tf.math.sin(self._t2)
+        c2 = tf.math.cos(self._t2)
+        npc = [[c1, s1, 0, 0], [-s1, c1, 0, 0], [0, 0, c2, s2], [0, 0, -s2, c2]]
         M = tf.convert_to_tensor(npc)
-        M = tf.reshape(M, [2, 2])
-        #print("SHAPE OF THINGS:", tf.shape(self._c), "*****", tf.shape(self._s), "*****", tf.shape(M), "****", tf.shape(X) )
-        #print("M:", M)
+        M = tf.reshape(M, [4, 4])
         return tf.linalg.matmul(X, M)
-#Quick vanilla GAN from https://machinelearningmastery.com/how-to-develop-a-generative-adversarial-network-for-a-1-dimensional-function-from-scratch-in-keras/
- 
-# define the standalone discriminator model
-def define_discriminator(n_inputs=2):
+    
+def define_discriminator(n_inputs=4):
 	model = Sequential()
 	model.add(Dense(25, activation='relu', input_dim=n_inputs))
 	model.add(Dense(25, activation='relu', input_dim=n_inputs))    
@@ -61,7 +66,7 @@ def define_generator(n_outputs=1):
 	#model.add(Dense(15, activation='relu', input_dim=n_outputs))    
 	#model.add(Dense(n_outputs, activation='linear'))
 
-	mymodel_inputtest = Input(shape=(2,))
+	mymodel_inputtest = Input(shape=(4,))
 	mymodel_test = MyLayer()(mymodel_inputtest)
 	model = Model(mymodel_inputtest, mymodel_test)
 	return model
@@ -82,9 +87,10 @@ def define_gan(generator, discriminator):
  
 # generate n real samples with class labels
 def generate_real_samples(n):
-	X = np.random.multivariate_normal([0, 0], [[1, 0],[0, 1]],n)
-	y = ones((n, 1))
-	return X, y
+	randomlySelectedY = np.argsort(np.random.random(len(px1)))[:n]
+	X = tf.convert_to_tensor([px1[randomlySelectedY], py1[randomlySelectedY], px2[randomlySelectedY], py2[randomlySelectedY]])
+	y = np.ones((n, 1))
+	return np.transpose(X), y
  
 # generate points in latent space as input for the generator
 def generate_latent_points(n):
@@ -99,7 +105,7 @@ def generate_fake_samples(generator, n):
 	# predict outputs
 	X = generator.predict(x_input)
 	# create class labels
-	y = zeros((n, 1))
+	y = np.zeros((n, 1))
 	return X, y
 
 def generate_fake_samples_with_input(generator, n):
@@ -108,11 +114,13 @@ def generate_fake_samples_with_input(generator, n):
 	# predict outputs
 	X = generator.predict(x_input)
 	# create class labels
-	y = zeros((n, 1))
+	y = np.zeros((n, 1))
 	return X, y, x_input
+
+k = 2000
  
 # train the generator and discriminator
-def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000):
+def train(g_model, d_model, gan_model, n_epochs=5*k, n_batch=k):
 	# determine half the size of one batch, for updating the discriminator
 	half_batch = int(n_batch / 2)
 	# manually enumerate epochs
@@ -127,16 +135,17 @@ def train(g_model, d_model, gan_model, n_epochs=10000, n_batch=128, n_eval=2000)
 		# prepare points in latent space as input for the generator
 		x_gan = generate_latent_points(n_batch)
 		# create inverted labels for the fake samples
-		y_gan = ones((n_batch, 1))
+		y_gan = np.ones((n_batch, 1))
 		# update the generator via the discriminator's error
 		gan_model.train_on_batch(x_gan, y_gan)
-#		if (i+1) % n_eval == 0:
-#			print("epoch = ", i)
-N = 1
-c_i = []
-s_i = []
-c_f = []
-s_f = []
+		if (i+1) % n_eval == 0:
+			print("epoch = ", i)
+            
+N = 50
+t1i = []
+t1f = []
+t2i = []
+t2f = []
 for j in range(N):
     print("j = ", j)
     # create the discriminator
@@ -145,13 +154,16 @@ for j in range(N):
     generator = define_generator()
     # create the gan
     gan_model = define_gan(generator, discriminator)
-    c_i.append(generator.layers[-1].get_weights()[0][0])
-    s_i.append(generator.layers[-1].get_weights()[1][0])
+    t1i.append(generator.layers[-1].get_weights()[0])
+    t2i.append(generator.layers[-1].get_weights()[1])
+
     # train model
     train(generator, discriminator, gan_model)
-    c_f.append(generator.layers[-1].get_weights()[0][0])
-    s_f.append(generator.layers[-1].get_weights()[1][0])
-print("c_i = ", c_i)
-print("s_i = ", s_i)
-print("c_f = ", c_f)
-print("s_f = ", s_f)
+    t1f.append(generator.layers[-1].get_weights()[0])
+    t2f.append(generator.layers[-1].get_weights()[1])
+    
+print("\n\n\n\n\n **** LHC Olympics ****")
+print("t1i = ", t1i)
+print("t2i = ", t2i)
+print("t1f = ", t1f)
+print("t2f = ", t2f)
