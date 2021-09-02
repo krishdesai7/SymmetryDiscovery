@@ -120,7 +120,7 @@ def generate_fake_samples_with_input(generator, n):
 k = 2000
  
 # train the generator and discriminator
-def train(g_model, d_model, gan_model, n_epochs=5*k, n_batch=k):
+def train(g_model, d_model, gan_model, n_epochs=5*k, n_batch=128, n_eval=k):
 	# determine half the size of one batch, for updating the discriminator
 	half_batch = int(n_batch / 2)
 	# manually enumerate epochs
@@ -146,6 +146,9 @@ t1i = []
 t1f = []
 t2i = []
 t2f = []
+
+print("\n\n\n\n\n **** LHC Olympics ****")
+
 for j in range(N):
     print("j = ", j)
     # create the discriminator
@@ -161,9 +164,12 @@ for j in range(N):
     train(generator, discriminator, gan_model)
     t1f.append(generator.layers[-1].get_weights()[0])
     t2f.append(generator.layers[-1].get_weights()[1])
+    print("t1i = ", t1i)
+    print("t2i = ", t2i)
+    print("t1f = ", t1f)
+    print("t2f = ", t2f)
+    print()
     
-print("\n\n\n\n\n **** LHC Olympics ****")
-print("t1i = ", t1i)
-print("t2i = ", t2i)
-print("t1f = ", t1f)
-print("t2f = ", t2f)
+print("END")
+    
+
